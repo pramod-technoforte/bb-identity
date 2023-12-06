@@ -20,8 +20,8 @@ if [ "$flag" = "n" ]; then
   ENABLE_INSECURE='--set onboarding.configmaps.onboarding.ENABLE_INSECURE=true';
 fi
 
-NS=digitalcard
-CHART_VERSION=12.0.2
+NS=esignet
+CHART_VERSION=12.0.1-B3
 
 echo Create $NS namespace
 kubectl create ns $NS
