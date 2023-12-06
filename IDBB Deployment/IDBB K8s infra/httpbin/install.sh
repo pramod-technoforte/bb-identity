@@ -5,7 +5,7 @@ if [ $# -ge 1 ] ; then
   export KUBECONFIG=$1
 fi
 
-NS=idbb-httpbin
+NS=httpbin
 kubectl create ns $NS 
 kubectl label ns $NS istio-injection=enabled --overwrite
 
