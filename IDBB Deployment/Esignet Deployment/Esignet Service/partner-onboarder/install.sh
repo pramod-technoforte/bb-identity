@@ -1,17 +1,14 @@
 #!/bin/bash
-# Onboards default partners
+# Onboards default partners 
 ## Usage: ./install.sh [kubeconfig]
 
 if [ $# -ge 1 ] ; then
   export KUBECONFIG=$1
 fi
 
-NS=onboarder
-CHART_VERSION=12.0.1-GB3
-
 echo "Do you have public domain & valid SSL? (Y/n) "
 echo "Y: if you have public domain & valid ssl certificate"
-echo "n: If you don't have a public domain and a valid SSL certificate. Note: It is recommended to use this option only in development environments."
+echo "n: if you don't have a public domain and a valid SSL certificate. It will add an ssl certificate in onboarder docker. Only recommended to use in local development environments"
 read -p "" flag
 
 if [ -z "$flag" ]; then
@@ -22,6 +19,9 @@ ENABLE_INSECURE=''
 if [ "$flag" = "n" ]; then
   ENABLE_INSECURE='--set onboarding.configmaps.onboarding.ENABLE_INSECURE=true';
 fi
+
+NS=digitalcard
+CHART_VERSION=12.0.2
 
 echo Create $NS namespace
 kubectl create ns $NS
@@ -67,14 +67,14 @@ function installing_onboarder() {
     s3_user_key=$( kubectl -n s3 get cm s3 -o json | jq -r '.data."s3-user-key"' )
 
     echo Onboarding default partners
-    helm -n $NS install partner-onboarder tf-govstack/partner-onboarder \
+    helm -n $NS install digitalcard-partner-onboarder mosip/partner-onboarder \
+    --set image.repository=technogovstack --set image.tag=release-1.2.0.1.2 \
     --set onboarding.configmaps.s3.s3-host="$s3_url" \
     --set onboarding.configmaps.s3.s3-user-key="$s3_user_key" \
     --set onboarding.configmaps.s3.s3-region="$s3_region" \
     --set onboarding.configmaps.s3.s3-bucket-name="$s3_bucket" \
     $ENABLE_INSECURE \
     -f values.yaml \
-    --wait --wait-for-jobs \
     --version $CHART_VERSION
 
     echo Reports are moved to S3 under onboarder bucket
